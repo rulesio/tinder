@@ -204,6 +204,22 @@ module Tinder
       end
     end
 
+    # Get 100 most recent messages
+    #
+    #   room.recent
+    #   room.recent(:limit => 10)
+    #   room.recent(:since_message_id => 18659245)
+    def recent(options={})
+      url = "/room/#{@id}/recent.json"
+      url += '?' + options.map{|k, v| "#{k}=#{v}"}.join('&') unless options.empty?
+      connection.get(url)['messages'].map do |room|
+        { :id => room['id'],
+          :user_id => room['user_id'],
+          :message => room['body'],
+          :timestamp => Time.parse(room['created_at']) }
+      end
+    end
+
     def upload(file, content_type = nil, filename = nil)
       require 'mime/types'
       content_type ||= MIME::Types.type_for(filename || file)
